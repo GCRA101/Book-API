@@ -1,0 +1,89 @@
+# DOCKER-COMPOSE YAML ---------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+
+# This file defines the CONTAINERS (services) that DOCKER will run: in this case two.
+# i.e. api (the Golang Application) and db (the PostgreSQL Database)
+# Below the step-by-step summary of what gets done in this file:
+#   1. Run two containers: one for the Go app, one for PostgreSQL.
+#   2. The Go app waits for the DB to be ready before starting.
+#   3. The DB is version 15, stores data in a volume, and loads the bookdb.sql 
+#      file on first run.
+
+services:
+  # CONTAINER for the Golang Application ********************************************
+  # 1. Name of container (i.e. api) 
+  api:
+    # 1.1 Build the image for this service/container using the Dockerfile in the 
+    # specified folder (i.e.: . )
+    build:
+      context: ../                    # Go back one level to find the source code
+      dockerfile: docker/Dockerfile   # Point to the Dockerfile inside the subfolder
+    # 1.2  Assign to the container a custom name (i.e. bookapi-api)
+    container_name: bookapi-api
+    # 1.3 Map the port on the computer (8080) with the corresponding one in the 
+    # container (8080)
+    ports:
+      - "8080:8080"
+    # 1.4 Load Environment Variables from the file .env (in same directory)
+    # env_file:   <-- IMPORTANT!! TO BE USED ONLY WHEN WE DO NOT USE the package
+    #   - .env                    godotenv in our Go Application !!!!!!!!!!!
+    # 1.5 Command Dcoker to wait until the database is healthy before starting the 
+    # Go Application that is stored in this container. This prevents errors like
+    # "DB not ready" when the app starts too early. <-- IMPORTANT !!!
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # CONTAINER for the PostgreSQL Database *******************************************
+  # 1. Name of container (i.e. db) 
+  db:
+    # 1.1 Use the Official PostgreSQL version 15 image from the Docker Hub
+    image: postgres:15
+    # 1.2  Assign to the container a custom name (i.e. bookapi-db)
+    container_name: bookapi-db
+    # 1.3 Set up DB's username, password and database name
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Burjkhalifa828@()@
+      POSTGRES_DB: bookdb
+    # 1.4 Map the port on the computer (5432) with the corresponding one in the 
+    # container (5432)
+    ports:
+      - "5432:5432"
+    # 1.5 Save the database data in a named volume so that it's not lost when the
+    # containers restart + Run the specified .sql file in db/init ONLY THE FIRST TIME 
+    # that the DB starts (in this way it's possible to load pre-existing tables and
+    # data stored/backedup in a .sql file.)
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../db/init/existingDB.sql:/docker-entrypoint-initdb.d/init.sql
+    # 1.6 Check if the database is healthy (ready) running pg_isready every 5 secs,
+    # waiting up to 5 secs each time and trying 5 times before giving up.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # CONTAINER for pgAdmin ***********************************************************
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: bookapi-pgadmin
+    ports:
+      - "5050:80"  # Access pgAdmin at http://localhost:5050
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+
+
+
+# VOLUMES **************************************************************************
+# Define named volumes called pgdata where the database stores its files so that
+# they don't get deleted when containers stop.
+volumes:
+  pgdata:
+  pgadmin_data:

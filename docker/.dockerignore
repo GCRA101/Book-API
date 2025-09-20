@@ -1,0 +1,16 @@
+# DOCKERIGNORE ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+
+# This file tells Docker which files and folders to ignore when building the image.
+# It works like .gitignore — anything listed below, won’t be copied into the Docker image.
+# This file is helpful in achieving the following targets:
+#   - Keep the image small
+#   - Avoid copying sensitive or unnecessary files
+#   - Speed up the build process
+
+.dockerignore
+.git
+.gitignore
+.env
+__pycache__
+*.log
