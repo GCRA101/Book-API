@@ -74,7 +74,8 @@ func NewRouter(cfg bookConfig.Config) http.Handler {
 	userHandler.RegisterRoutes(r)
 	authHandler.RegisterRoutes(r)
 	adminHandler.RegisterRoutes(r.With(middleware.JWTAuth(cfg.JWTSecret)))
-	bookHandler.RegisterRoutes(r.With(middleware.JWTAuth(cfg.JWTSecret)))
+	bookHandler.RegisterRoutes(r)
+	//(r.With(middleware.JWTAuth(cfg.JWTSecret)))
 
 	/* 8. Register the Swagger Route to its imported Handler */
 	r.Group(func(r chi.Router) {
