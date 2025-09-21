@@ -27,11 +27,9 @@ export default {
   <button @click="loadBooksList">
       Load Books
   </button>
+  <ul>
+    <!-- Loop the <li> tag for each book -->
+    <li v-for="b in books">Title: {{b.title}} - Author:{{b.author}}</li>
+  </ul>
   </div>
-  <div>
-    <ul>
-        <!-- Loop the <li> tag for each book -->
-        <li v-for="b in books">Title: {{b.title}} - Author:{{b.author}}</li>
-    </ul>
-   </div>
 </template>
