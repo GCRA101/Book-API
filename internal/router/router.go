@@ -62,6 +62,7 @@ func NewRouter(cfg bookConfig.Config) http.Handler {
 	/* 5. Create new CHI Router. */
 	r := chi.NewRouter()
 	/* 6. Apply Middleware */
+	r.Use(middleware.CorsMiddleware(cfg))              /* 	>>>> Custom CORS Middleware <<<< */
 	r.Use(middleware.Logging, chimiddleware.Recoverer) /*   >>>> Custom and CHI-Built-In Middleware <<<<< */
 	r.Use(middleware.HSTS)                             /* 					  >>>> HTTPS Middleware <<<<< */
 	if cfg.ServerPort == "6379" {
